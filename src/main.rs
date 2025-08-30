@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use rand::seq::IndexedRandom;
 
 use crate::{
-    color::{COLOR_EMPTY, COLOR_WILD},
+    color::{COLOR_DOOR, COLOR_EMPTY, COLOR_WILD},
     grid::Grid,
     pos::Pos,
     rule::{Rule, load_rules},
@@ -101,17 +101,45 @@ fn apply_rule(level: &mut Grid, rule: &Rule, shift: Pos) {
     }
 }
 
-fn main() {
-    let mut level = Grid::load_from_image("start.png");
-    let rules = load_rules("rules.png");
+fn generate_level(start: &str, rule_files: &[&str]) -> Grid {
+    let mut level = Grid::load_from_image(start);
 
     let mut rng = rand::rng();
 
-    let shifts = valid_shifts(&level, &rules[0]);
-    println!("shifts: {:?}", shifts);
+    for rule_file in rule_files.iter() {
+        let rules: Vec<Rule> = load_rules(rule_file)
+            .into_iter()
+            .flat_map(|rule| {
+                let mut rots = vec![rule.clone()];
+                let rule = rule.rotated90();
+                rots.push(rule.clone());
+                let rule = rule.rotated90();
+                rots.push(rule.clone());
+                let rule = rule.rotated90();
+                rots.push(rule);
 
-    let shift = shifts.choose(&mut rng).unwrap();
-    apply_rule(&mut level, &rules[0], *shift);
+                rots
+            })
+            .collect();
 
-    level.save_to_image("result.png");
+        for _ in 0..1000 {
+            let rule = rules.choose(&mut rng).unwrap();
+
+            let shifts = valid_shifts(&level, rule);
+            let Some(shift) = shifts.choose(&mut rng) else {
+                continue;
+            };
+
+            println!("applying rule");
+            apply_rule(&mut level, rule, *shift);
+        }
+    }
+    level
+}
+
+fn main() {
+    for i in 0..5 {
+        let level = generate_level("start.png", &["rules.png", "cleanup.png", "reshape.png"]);
+        level.save_to_image(&format!("result{i}.png"));
+    }
 }

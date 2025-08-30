@@ -21,4 +21,11 @@ impl Pos {
             self.shift(0, -1),
         ]
     }
+
+    pub fn rotated90(self) -> Self {
+        Self {
+            x: self.y,
+            y: -self.x,
+        }
+    }
 }

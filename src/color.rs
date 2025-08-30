@@ -5,3 +5,4 @@ pub const COLOR_EMPTY: Color = image::Rgb([0, 0, 0]);
 pub const COLOR_RULE: Color = image::Rgb([255, 255, 0]);
 pub const COLOR_RULE_THEN: Color = image::Rgb([255, 128, 0]);
 pub const COLOR_WILD: Color = image::Rgb([255, 0, 255]);
+pub const COLOR_DOOR: Color = image::Rgb([128, 128, 128]);

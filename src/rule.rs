@@ -13,6 +13,29 @@ pub struct Rule {
     pub after: Grid,
 }
 
+impl Rule {
+    pub fn rotated90(&self) -> Rule {
+        Self {
+            before: Grid {
+                cells: self
+                    .before
+                    .cells
+                    .iter()
+                    .map(|(p, v)| (p.rotated90(), *v))
+                    .collect(),
+            },
+            after: Grid {
+                cells: self
+                    .after
+                    .cells
+                    .iter()
+                    .map(|(p, v)| (p.rotated90(), *v))
+                    .collect(),
+            },
+        }
+    }
+}
+
 pub fn load_rules(src: &str) -> Vec<Rule> {
     let grid = Grid::load_from_image(src);
 
@@ -58,11 +81,6 @@ pub fn load_rules(src: &str) -> Vec<Rule> {
             cells: island.into_iter().map(|p| (p, grid.cells[&p])).collect(),
         };
         regions.push(new_grid);
-    }
-
-    println!("found {} regions", regions.len());
-    for (region_index, region) in regions.iter().enumerate() {
-        region.save_to_image(&format!("rule_image_{region_index}.png"));
     }
 
     let cell_to_region_index: HashMap<Pos, usize> = regions
